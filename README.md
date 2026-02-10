@@ -43,7 +43,7 @@
 - JWT Authentication
 - bcrypt
 - CORS
-- 
+
 
 ---
 
