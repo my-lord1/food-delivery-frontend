@@ -17,6 +17,8 @@ import RestaurantMenu from './pages/restaurant/RestaurantMenu';
 import RestaurantReviews from './pages/restaurant/RestaurantReviews';
 import LoginSuccessPage from './pages/auth/LoginSuccess';
 import CreateRestaurant from './pages/restaurant/CreateRestaurant';
+import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
+import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
@@ -51,6 +53,8 @@ function AppRoutes() {
       <Routes>
         <Route path="/" element={ <PublicRoute> <AuthPage /> </PublicRoute> }/>
         <Route path="/login-success" element={<LoginSuccessPage />} />
+        <Route path="/forgot-password" element={ <PublicRoute> <ForgotPasswordPage /> </PublicRoute> }/>
+        <Route path="/reset-password/:resettoken" element={ <PublicRoute> <ResetPasswordPage /> </PublicRoute> }/>
         <Route path="/restaurants" element={ <ProtectedRoute allowedRoles={['customer']}> <RestaurantsPage /> </ProtectedRoute> }/>
         <Route path="/restaurant/:id" element={ <ProtectedRoute allowedRoles={['customer']}> <RestaurantDetailPage /> </ProtectedRoute>}/>
         <Route path="/cart" element={ <ProtectedRoute allowedRoles={['customer']}> <CartPage /> </ProtectedRoute> } />

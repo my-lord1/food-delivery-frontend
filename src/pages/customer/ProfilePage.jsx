@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { MapPin, CreditCard, LogOut, Plus, Edit2, Trash2, X, Check } from 'lucide-react';
+import { MapPin, CreditCard, LogOut, Plus, Edit2, Trash2, X, Check, Lock, ShieldCheck } from 'lucide-react'; // Added Lock, ShieldCheck
 import Header from '../../components/common/Header';
 import Footer from '../../components/common/Footer';
 import { logout, updateUser } from '../../redux/slices/authSlice';
@@ -12,22 +12,19 @@ const ProfilePage = () => {
   const dispatch = useDispatch();
 
   const { user } = useSelector((state) => state.auth);
-
   const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [profileData, setProfileData] = useState({
-    name: user?.name || '',
-  });
-
+  const [profileData, setProfileData] = useState({ name: user?.name || '' });
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [editingAddressId, setEditingAddressId] = useState(null); 
   const [addressForm, setAddressForm] = useState({
-    label: 'Home',
-    street: '',
-    city: '',
-    state: '',
-    pincode: '',
-    landmark: '',
-    isDefault: false
+    label: 'home', street: '', city: '', state: '', pincode: '', landmark: '', isDefault: false
+  });
+
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
   });
 
   const handleUpdateProfile = async (e) => {
@@ -50,7 +47,7 @@ const ProfilePage = () => {
 
   const openAddAddress = () => {
     setEditingAddressId(null);
-    setAddressForm({ label: 'Home', street: '', city: '', state: '', pincode: '', landmark: '', isDefault: false });
+    setAddressForm({ label: 'home', street: '', city: '', state: '', pincode: '', landmark: '', isDefault: false });
     setShowAddressModal(true);
   };
 
@@ -69,12 +66,11 @@ const ProfilePage = () => {
      } else {
         response = await api.post('/api/auth/addresses', addressForm);
      }
-      
       dispatch(updateUser(response.data.data)); 
       setShowAddressModal(false);
     } catch (error) {
       console.error('Error saving address:', error);
-      alert('Failed to save address. Please try again.');
+      alert(error.response?.data?.message || 'Failed to save address.');
     }
   };
 
@@ -84,15 +80,40 @@ const ProfilePage = () => {
       const response = await api.delete(`/api/auth/addresses/${addressId}`);
       dispatch(updateUser(response.data.data));
     } catch (error) {
-      console.error('Error deleting address:', error);
       alert('Failed to delete address.');
     }
   };
 
+  const handleUpdatePassword = async (e) => {
+    e.preventDefault();
+    
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      return alert("New passwords do not match!");
+    }
+
+    if (passwordForm.newPassword.length < 6) {
+      return alert("Password must be at least 6 characters long.");
+    }
+
+    try {
+      await api.put('/api/auth/update-password', {
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword
+      });
+      
+      alert("Password updated successfully!");
+      setShowPasswordModal(false);
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' }); 
+    } catch (error) {
+      console.error('Error updating password:', error);
+      alert(error.response?.data?.message || "Failed to update password");
+    }
+  };
+  const capitalize = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
-
       <div className="flex-1 w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-28">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-black text-gray-900">My Profile</h1>
@@ -111,13 +132,27 @@ const ProfilePage = () => {
               <div>
                 <h2 className="text-2xl font-black text-gray-900 mb-1">{user?.name}</h2>
                 <p className="text-gray-500 font-medium mb-1">{user?.email}</p>
+
+                {user?.authProvider === 'google' && (
+                  <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-600 text-xs font-bold px-2 py-1 rounded-md mt-1">
+                    <ShieldCheck size={12} /> Google Account
+                  </span>
+                )}
               </div>
             </div>
 
             {!isEditingProfile && (
-              <button onClick={() => setIsEditingProfile(true)} className="flex items-center gap-2 px-6 py-3 border-2 border-gray-200 hover:border-black text-gray-700 hover:text-black font-bold rounded-xl transition-all">
-                <Edit2 size={18} /> Edit Name
-              </button>
+              <div className="flex gap-3">
+                {user?.authProvider !== 'google' && (
+                  <button onClick={() => setShowPasswordModal(true)} className="flex items-center gap-2 px-4 py-3 border-2 border-gray-200 hover:border-black text-gray-700 hover:text-black font-bold rounded-xl transition-all">
+                    <Lock size={18} /> Change Password
+                  </button>
+                )}
+                
+                <button onClick={() => setIsEditingProfile(true)} className="flex items-center gap-2 px-6 py-3 border-2 border-gray-200 hover:border-black text-gray-700 hover:text-black font-bold rounded-xl transition-all">
+                  <Edit2 size={18} /> Edit Name
+                </button>
+              </div>
             )}
           </div>
 
@@ -158,7 +193,7 @@ const ProfilePage = () => {
                 <div key={addr._id} className="border-2 border-gray-100 p-5 rounded-2xl hover:border-orange-200 transition-colors group relative">
                    <div className="flex justify-between items-start mb-2">
                       <span className="bg-gray-100 text-gray-600 text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded">
-                        {addr.label}
+                        {capitalize(addr.label)}
                       </span>
                       {addr.isDefault && <span className="text-xs font-bold text-green-600 flex items-center gap-1"><Check size={12}/> Default</span>}
                    </div>
@@ -211,61 +246,53 @@ const ProfilePage = () => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-3xl w-full max-w-lg p-8 shadow-2xl relative animate-in zoom-in-95">
              <button onClick={() => setShowAddressModal(false)} className="absolute top-6 right-6 p-2 hover:bg-gray-100 rounded-full transition"><X size={20}/></button>
-             
-             <h2 className="text-2xl font-black text-gray-900 mb-6">
-               {editingAddressId ? 'Edit Address' : 'Add New Address'}
-             </h2>
-             
+             <h2 className="text-2xl font-black text-gray-900 mb-6">{editingAddressId ? 'Edit Address' : 'Add New Address'}</h2>
              <form onSubmit={handleSaveAddress} className="space-y-4">
                 <div className="grid grid-cols-3 gap-4">
-                   {['Home', 'Work', 'Other'].map(type => (
-                     <button 
-                       key={type} type="button"
-                       onClick={() => setAddressForm({...addressForm, label: type})}
-                       className={`py-2 rounded-xl text-sm font-bold border transition-all ${addressForm.label === type ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-500 border-gray-200'}`}
-                     >
-                       {type}
-                     </button>
+                   {[ { id: 'home', label: 'Home' }, { id: 'work', label: 'Work' }, { id: 'other', label: 'Other' } ].map((type) => (
+                     <button key={type.id} type="button" onClick={() => setAddressForm({...addressForm, label: type.id})} className={`py-2 rounded-xl text-sm font-bold border transition-all ${addressForm.label === type.id ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-gray-500 border-gray-200'}`}>{type.label}</button>
                    ))}
                 </div>
+                <div><label className="block text-xs font-bold text-gray-400 uppercase mb-1">Street / Flat No</label><input required type="text" value={addressForm.street} onChange={e => setAddressForm({...addressForm, street: e.target.value})} className="w-full px-4 py-3 bg-gray-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-orange-500 outline-none font-medium"/></div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div><label className="block text-xs font-bold text-gray-400 uppercase mb-1">City</label><input required type="text" value={addressForm.city} onChange={e => setAddressForm({...addressForm, city: e.target.value})} className="w-full px-4 py-3 bg-gray-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-orange-500 outline-none font-medium"/></div>
+                  <div><label className="block text-xs font-bold text-gray-400 uppercase mb-1">State</label><input required type="text" value={addressForm.state} onChange={e => setAddressForm({...addressForm, state: e.target.value})} className="w-full px-4 py-3 bg-gray-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-orange-500 outline-none font-medium"/></div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div><label className="block text-xs font-bold text-gray-400 uppercase mb-1">Pincode</label><input required type="text" pattern="[0-9]*" value={addressForm.pincode} onChange={e => setAddressForm({...addressForm, pincode: e.target.value})} className="w-full px-4 py-3 bg-gray-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-orange-500 outline-none font-medium"/></div>
+                  <div><label className="block text-xs font-bold text-gray-400 uppercase mb-1">Landmark (Optional)</label><input type="text" value={addressForm.landmark} onChange={e => setAddressForm({...addressForm, landmark: e.target.value})} className="w-full px-4 py-3 bg-gray-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-orange-500 outline-none font-medium"/></div>
+                </div>
+                <label className="flex items-center gap-3 cursor-pointer py-2"><div className={`w-5 h-5 rounded border flex items-center justify-center ${addressForm.isDefault ? 'bg-green-500 border-green-500' : 'border-gray-300'}`}>{addressForm.isDefault && <Check size={14} className="text-white"/>}</div><input type="checkbox" className="hidden" checked={addressForm.isDefault} onChange={e => setAddressForm({...addressForm, isDefault: e.target.checked})} /><span className="text-sm font-bold text-gray-700">Set as default address</span></label>
+                <button type="submit" className="w-full bg-black text-white font-bold py-4 rounded-xl hover:bg-gray-900 transition mt-2">{editingAddressId ? 'Update Address' : 'Save Address'}</button>
+             </form>
+          </div>
+        </div>
+      )}
 
+      {showPasswordModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl w-full max-w-md p-8 shadow-2xl relative animate-in zoom-in-95">
+             <button onClick={() => setShowPasswordModal(false)} className="absolute top-6 right-6 p-2 hover:bg-gray-100 rounded-full transition"><X size={20}/></button>
+             
+             <h2 className="text-2xl font-black text-gray-900 mb-6 flex items-center gap-2">
+               <ShieldCheck className="text-orange-500"/> Change Password
+             </h2>
+             
+             <form onSubmit={handleUpdatePassword} className="space-y-4">
                 <div>
-                   <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Street / Flat No</label>
-                   <input required type="text" value={addressForm.street} onChange={e => setAddressForm({...addressForm, street: e.target.value})} className="w-full px-4 py-3 bg-gray-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-orange-500 outline-none font-medium"/>
+                   <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Current Password</label>
+                   <input required type="password" value={passwordForm.currentPassword} onChange={e => setPasswordForm({...passwordForm, currentPassword: e.target.value})} className="w-full px-4 py-3 bg-gray-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-orange-500 outline-none font-medium"/>
                 </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-400 uppercase mb-1">City</label>
-                    <input required type="text" value={addressForm.city} onChange={e => setAddressForm({...addressForm, city: e.target.value})} className="w-full px-4 py-3 bg-gray-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-orange-500 outline-none font-medium"/>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-400 uppercase mb-1">State</label>
-                    <input required type="text" value={addressForm.state} onChange={e => setAddressForm({...addressForm, state: e.target.value})} className="w-full px-4 py-3 bg-gray-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-orange-500 outline-none font-medium"/>
-                  </div>
+                <div>
+                   <label className="block text-xs font-bold text-gray-400 uppercase mb-1">New Password</label>
+                   <input required type="password" value={passwordForm.newPassword} onChange={e => setPasswordForm({...passwordForm, newPassword: e.target.value})} className="w-full px-4 py-3 bg-gray-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-orange-500 outline-none font-medium"/>
                 </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Pincode</label>
-                    <input required type="text" pattern="[0-9]*" value={addressForm.pincode} onChange={e => setAddressForm({...addressForm, pincode: e.target.value})} className="w-full px-4 py-3 bg-gray-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-orange-500 outline-none font-medium"/>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Landmark (Optional)</label>
-                    <input type="text" value={addressForm.landmark} onChange={e => setAddressForm({...addressForm, landmark: e.target.value})} className="w-full px-4 py-3 bg-gray-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-orange-500 outline-none font-medium"/>
-                  </div>
+                <div>
+                   <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Confirm New Password</label>
+                   <input required type="password" value={passwordForm.confirmPassword} onChange={e => setPasswordForm({...passwordForm, confirmPassword: e.target.value})} className="w-full px-4 py-3 bg-gray-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-orange-500 outline-none font-medium"/>
                 </div>
-                
-                <label className="flex items-center gap-3 cursor-pointer py-2">
-                   <div className={`w-5 h-5 rounded border flex items-center justify-center ${addressForm.isDefault ? 'bg-green-500 border-green-500' : 'border-gray-300'}`}>
-                      {addressForm.isDefault && <Check size={14} className="text-white"/>}
-                   </div>
-                   <input type="checkbox" className="hidden" checked={addressForm.isDefault} onChange={e => setAddressForm({...addressForm, isDefault: e.target.checked})} />
-                   <span className="text-sm font-bold text-gray-700">Set as default address</span>
-                </label>
-
                 <button type="submit" className="w-full bg-black text-white font-bold py-4 rounded-xl hover:bg-gray-900 transition mt-2">
-                  {editingAddressId ? 'Update Address' : 'Save Address'}
+                  Update Password
                 </button>
              </form>
           </div>
