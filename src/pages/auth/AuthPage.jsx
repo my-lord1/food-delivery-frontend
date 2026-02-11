@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom'; // Added Link import
+import { useNavigate, Link } from 'react-router-dom'; 
 import { useDispatch } from 'react-redux'; 
 import { loginSuccess } from '../../redux/slices/authSlice'; 
 import { UtensilsCrossed, Store, CheckCircle2, Mail, Lock, User, ArrowRight, AlertCircle } from 'lucide-react';
@@ -66,7 +66,7 @@ const AuthPage = () => {
         user: data.user
       }));
 
-      if (data.user.role === 'restaurant_owner') {
+      if (role === 'restaurant_owner') {
         navigate('/restaurant/dashboard');
       } else {
         navigate('/restaurants');
@@ -103,7 +103,7 @@ const AuthPage = () => {
             { id: 'restaurant_owner', label: 'Cook', sub: 'Partner', icon: Store }
           ].map((item) => (
             <button key={item.id} onClick={() => setRole(item.id)} type="button" 
-              className={`group relative flex flex-col items-center justify-center h-40 w-32 rounded-2xl border-2 transition-all duration-300 ${role === item.id ? 'border-orange-500 bg-orange-50 shadow-md scale-105': 'border-gray-100 bg-white hover:border-orange-200'}`}>
+              className={`cursor-pointer group relative flex flex-col items-center justify-center h-40 w-32 rounded-2xl border-2 transition-all duration-300 ${role === item.id ? 'border-orange-500 bg-orange-50 shadow-md scale-105': 'border-gray-100 bg-white hover:border-orange-200'}`}>
               {role === item.id && (
                 <motion.div layoutId="outline" className="absolute inset-0 rounded-2xl ring-2 ring-orange-500 ring-offset-2" />
               )}
@@ -170,13 +170,13 @@ const AuthPage = () => {
           </div>
           {isLogin && (
             <div className="flex justify-end">
-              <Link to="/forgot-password" className="text-sm text-orange-600 font-bold hover:underline">
+              <Link to="/forgot-password" className="text-sm text-orange-600 font-bold hover:underline cursor-pointer">
                 Forgot Password?
               </Link>
             </div>
           )}
 
-          <button type="submit" disabled={isLoading} className="mt-2 bg-orange-500 text-white font-bold py-3 rounded-xl hover:bg-orange-600 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
+          <button type="submit" disabled={isLoading} className="mt-2 bg-orange-500 text-white font-bold py-3 rounded-xl hover:bg-orange-600 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer">
             {isLoading ? 'Processing...' : (isLogin ? 'Sign In' : 'Create Account')}
             {!isLoading && <ArrowRight size={18} />}
           </button>
@@ -189,7 +189,7 @@ const AuthPage = () => {
                 setIsLogin(!isLogin);
                 setError('');
               }} 
-              className="text-orange-600 font-bold hover:underline">
+              className="text-orange-600 font-bold hover:underline cursor-pointer">
               {isLogin ? 'Sign Up' : 'Sign In'}
             </button>
           </p>
@@ -201,7 +201,7 @@ const AuthPage = () => {
           <div className="flex-grow border-t border-gray-200"></div>
         </div>
 
-        <button onClick={handleGoogleLogin} className='w-full h-12 bg-black text-white rounded-xl flex items-center justify-center gap-3 hover:bg-gray-900 transition-colors'>
+        <button onClick={handleGoogleLogin} className='w-full h-12 bg-black text-white rounded-xl flex items-center justify-center gap-3 hover:bg-gray-900 transition-colors cursor-pointer'>
           <div className="bg-white p-1 rounded-full">
             <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>

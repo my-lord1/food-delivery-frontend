@@ -258,14 +258,14 @@ const calculateModalTotal = () => {
                                     <div className="font-black text-gray-700">₹{item.price}</div>
                                     <p className="text-sm text-gray-500 line-clamp-2">{item.description}</p>
                                     
-                                    <button onClick={() => setSelectedNutrition(item)} className="flex items-center gap-1 text-xs font-bold text-blue-600 hover:underline pt-2">
+                                    <button onClick={() => setSelectedNutrition(item)} className="flex items-center gap-1 text-xs font-bold text-blue-600 hover:underline pt-2 cursor-pointer">
                                       <Info size={14} /> View Nutritional Info
                                     </button>
                                 </div>
                                 
                                 <div className="relative w-32 h-32 flex-shrink-0">
                                     <img src={item.image?.url || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400"} alt={item.name} className="w-full h-full object-cover rounded-xl"/>
-                                    <button onClick={() => handleAddItemClick(item)} className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-white text-green-600 font-black px-6 py-2 rounded-lg shadow-lg border border-gray-100 uppercase text-sm hover:bg-green-50 transition-colors">
+                                    <button onClick={() => handleAddItemClick(item)} className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-white text-green-600 font-black px-6 py-2 rounded-lg shadow-lg border border-gray-100 uppercase text-sm hover:bg-green-50 transition-colors cursor-pointer">
                                         ADD
                                     </button>
                                 </div>
@@ -352,7 +352,7 @@ const calculateModalTotal = () => {
                   </div>
                   
                   <div className="space-y-3">
-                    {group.options.map((option) => {d
+                    {group.options.map((option) => {
                       const isSelected = selectedOptions[group.name]?.some(opt => opt.name === option.name);
                       
                       return (
