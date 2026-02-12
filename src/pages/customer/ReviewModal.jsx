@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Star, X, Loader, MessageSquare } from 'lucide-react';
 import api from '../../services/api';
-import { toast } from 'react-hot-toast';
+import { toast, Toaster } from 'react-hot-toast'; 
 
 const ReviewModal = ({ isOpen, onClose, order, viewOnly = false }) => {
   const [loading, setLoading] = useState(false);
@@ -55,7 +55,11 @@ const ReviewModal = ({ isOpen, onClose, order, viewOnly = false }) => {
       });
 
       toast.success('Review submitted successfully!');
-      onClose();
+      
+      setTimeout(() => {
+        onClose();
+      }, 1500);
+
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to submit review');
     } finally {
@@ -85,7 +89,10 @@ const ReviewModal = ({ isOpen, onClose, order, viewOnly = false }) => {
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-150 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+      
+      <Toaster position="top-center" containerStyle={{ zIndex: 99999 }} />
+
       <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
           <div>
