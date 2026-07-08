@@ -1,7 +1,8 @@
-# FlavorFleet - Multi-Vendor Food Delivery Platform
+# Multi-Vendor Food Delivery Platform
 
-**FlavorFleet** is a fully functional, production-ready food delivery marketplace connecting hungry customers with local restaurants. Built with the MERN stack, it features secure Google OAuth authentication, real-time order tracking, a dynamic restaurant dashboard, and a seamless checkout experience.
+**Giggidy** is a fully functional, production-ready multi roles food delivery marketplace connecting hungry customers with local restaurants. Built with the MERN stack, it features secure Google OAuth authentication, real-time order tracking, a dynamic restaurant dashboard, and a seamless checkout experience.
 
+Backend Repo: [GitHub](https://github.com/nivas-reddy1/food-delivery-backend)
 
 ## Features Breakdown
 
@@ -26,7 +27,7 @@
 
 ---
 
-## 🛠 Tech Stack
+## Tech Stack
 
 ### Frontend
 - React.js
